@@ -22,11 +22,10 @@ def find_account_json_file(directory):
     file = os.path.join(directory, "account.json")
     if os.path.exists(file):
         return file
-    else:
-        parent = os.path.realpath(os.path.join(directory, ".."))
-        if parent == directory:
-            error("could not find account.json in one of the parent directories")
-        return find_account_json_file(parent)
+    parent = os.path.realpath(os.path.join(directory, ".."))
+    if parent == directory:
+        error("could not find account.json in one of the parent directories")
+    return find_account_json_file(parent)
 
 
 def find_aws_account_id(account_json):
@@ -84,7 +83,7 @@ def error(message):
 
 
 if __name__ == "__main__":
-    print(f"terragrunt-locals.py: calculating configuration...", file=sys.stderr)
+    print("terragrunt-locals.py: calculating configuration...", file=sys.stderr)
 
     if len(sys.argv) != 2:
         error(f"usage: {sys.argv[0]} <terragrunt-dir>")

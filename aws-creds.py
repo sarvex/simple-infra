@@ -46,11 +46,11 @@ def get_session_token(duration, mfa_serial, mfa_code):
     except subprocess.CalledProcessError as e:
         err(f"failed to get a session token: {e}")
 
-    env = {}
-    env["AWS_ACCESS_KEY_ID"] = out["Credentials"]["AccessKeyId"]
-    env["AWS_SECRET_ACCESS_KEY"] = out["Credentials"]["SecretAccessKey"]
-    env["AWS_SESSION_TOKEN"] = out["Credentials"]["SessionToken"]
-    return env
+    return {
+        "AWS_ACCESS_KEY_ID": out["Credentials"]["AccessKeyId"],
+        "AWS_SECRET_ACCESS_KEY": out["Credentials"]["SecretAccessKey"],
+        "AWS_SESSION_TOKEN": out["Credentials"]["SessionToken"],
+    }
 
 
 def load_mfa_device():
@@ -105,10 +105,9 @@ def cached(path, get):
     """Store the result of the computation in a plaintext file."""
     if path.is_file():
         return path.read_text().strip()
-    else:
-        val = get()
-        path.write_text(f"{val}\n")
-        return val
+    val = get()
+    path.write_text(f"{val}\n")
+    return val
 
 
 def eprint(*args, **kwargs):

@@ -21,9 +21,10 @@ def promote_release(args):
         print(f"       allowed channels: {ALLOWED_CHANNELS}")
         exit(1)
 
-    vars = {}
-    vars["PROMOTE_RELEASE_ACTION"] = "promote-release"
-    vars["PROMOTE_RELEASE_CHANNEL"] = args.channel
+    vars = {
+        "PROMOTE_RELEASE_ACTION": "promote-release",
+        "PROMOTE_RELEASE_CHANNEL": args.channel,
+    }
     if args.override_commit is not None:
         vars["PROMOTE_RELEASE_OVERRIDE_COMMIT"] = args.override_commit
     if args.bypass_startup_checks:
@@ -42,11 +43,10 @@ def promote_release(args):
 
 
 def promote_branches():
-    vars = {}
-    vars["PROMOTE_RELEASE_ACTION"] = "promote-branches"
-    # Not actually used, but needed by the configuration parsing code. We set it
-    # to nightly which is 'safer' to get wrong.
-    vars["PROMOTE_RELEASE_CHANNEL"] = "nightly"
+    vars = {
+        "PROMOTE_RELEASE_ACTION": "promote-branches",
+        "PROMOTE_RELEASE_CHANNEL": "nightly",
+    }
     run_build('prod', vars)
 
 

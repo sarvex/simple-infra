@@ -127,7 +127,7 @@ def init_terraform_module_path(name: str) -> str:
     )
 
     if not os.path.isdir(terraform_path):
-        raise Exception("ERROR failed to find Terraform module with name " + name)
+        raise Exception(f"ERROR failed to find Terraform module with name {name}")
 
     return terraform_path
 
@@ -144,8 +144,8 @@ def confirm_or_exit(config: Config) -> None:
     )
 
     print("\nPlease review the following parameters:\n")
-    print("  From: " + relative_terraform_path)
-    print("  To:   " + relative_terragrunt_path)
+    print(f"  From: {relative_terraform_path}")
+    print(f"  To:   {relative_terragrunt_path}")
     print("\nPrefix: " + config.terraform_resource_prefix)
 
     if config.dry_run:
@@ -161,9 +161,9 @@ def confirm_or_exit(config: Config) -> None:
 
 
 def load_terraform_resources(config: Config) -> [dict]:
-    command = ["terraform", "show", "-json"]
     cwd = config.terraform_module_path
 
+    command = ["terraform", "show", "-json"]
     state_as_json = run_command(config, command, cwd)
     state = json.loads(state_as_json)
 
@@ -172,9 +172,7 @@ def load_terraform_resources(config: Config) -> [dict]:
     if child_module is None:
         if config.debug:
             print(
-                "DEBUG failed to find child module with address "
-                + config.terraform_resource_prefix
-                + " in state"
+                f"DEBUG failed to find child module with address {config.terraform_resource_prefix} in state"
             )
 
         return []
@@ -182,7 +180,7 @@ def load_terraform_resources(config: Config) -> [dict]:
     resources = child_module["resources"]
 
     if config.debug:
-        print("DEBUG found " + str(len(resources)) + " resources in Terraform")
+        print(f"DEBUG found {len(resources)} resources in Terraform")
 
     return resources
 
@@ -200,7 +198,7 @@ def load_terragrunt_resources(config: Config) -> [dict]:
         resources = []
 
     if config.debug:
-        print("DEBUG found " + str(len(resources)) + " resources in terragrunt")
+        print(f"DEBUG found {len(resources)} resources in terragrunt")
 
     return resources
 
@@ -239,7 +237,7 @@ def filter_ignored_resources(config: Config, items: [dict]) -> [dict]:
 
     if config.debug:
         filtered_count = len(items) - len(resources)
-        print("DEBUG ignoring " + str(filtered_count) + " resources in Terraform")
+        print(f"DEBUG ignoring {str(filtered_count)} resources in Terraform")
 
     return resources
 
@@ -249,7 +247,8 @@ def filter_existing_resources(
 ) -> [dict]:
     existing_addresses = list(
         map(
-            lambda item: config.terraform_resource_prefix + "." + item["address"],
+            lambda item: f"{config.terraform_resource_prefix}."
+            + item["address"],
             terragrunt_resources,
         )
     )
@@ -271,15 +270,9 @@ def filter_existing_resources(
 
 
 def get_ids_for_resources(resources: [dict]) -> dict:
-    ids = {}
-
-    for resource in resources:
-        address = resource["address"]
-        id = resource["values"]["id"]
-
-        ids[address] = id
-
-    return ids
+    return {
+        resource["address"]: resource["values"]["id"] for resource in resources
+    }
 
 
 def import_resources(config: Config, ids: dict):
@@ -287,7 +280,7 @@ def import_resources(config: Config, ids: dict):
 
     for address, id in ids.items():
         terragrunt_address = address.removeprefix(
-            config.terraform_resource_prefix + "."
+            f"{config.terraform_resource_prefix}."
         )
 
         cmd = ["terragrunt", "import", terragrunt_address, id]

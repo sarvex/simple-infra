@@ -36,9 +36,13 @@ def main():
     eprint(f"image pushed at {image_pushed_at} retaged as '{TARGET_TAG}'\n")
     if can_redeploy(repository_name):
         redeployed = force_redeploy()
-        print("{}".format("successfully rollback and re-deploy" if redeployed else "Successfully rolled back the image, but redeploying the service with the same name failed"))
+        print(
+            f'{"successfully rollback and re-deploy" if redeployed else "Successfully rolled back the image, but redeploying the service with the same name failed"}'
+        )
     else:
-        eprint(f"Successfully rolled back the image, but no service with the same name to redeploy found")
+        eprint(
+            "Successfully rolled back the image, but no service with the same name to redeploy found"
+        )
 
 def let_user_pick_image(images, isRetry=None):
     if isRetry is None:
@@ -46,7 +50,7 @@ def let_user_pick_image(images, isRetry=None):
         for idx, image in enumerate(images):
             image_pushed_at = format_time(image["imagePushedAt"])
             tags = ", ".join(image.get("imageTags", []))
-            print("{}) {} {}".format(idx+1,image_pushed_at,"("+tags+")" if tags != "" else ""))
+            print(f'{idx + 1}) {image_pushed_at} {f"({tags})" if tags != "" else ""}')
         print("")
     else:
         print(f"Invalid value, please check the list of possible values...\n")
@@ -77,11 +81,19 @@ def get_images(repository_name):
 def get_image_manifest(repository_name, imageDigest):
     """Call ecr batch-get-image to get the image manifest"""
     try:
-        out = json.loads( run_command([
-            "aws", "ecr", "batch-get-image",
-            "--repository-name", repository_name,
-            "--image-ids", "imageDigest={}".format(imageDigest)
-        ]).stdout)
+        out = json.loads(
+            run_command(
+                [
+                    "aws",
+                    "ecr",
+                    "batch-get-image",
+                    "--repository-name",
+                    repository_name,
+                    "--image-ids",
+                    f"imageDigest={imageDigest}",
+                ]
+            ).stdout
+        )
     except subprocess.CalledProcessError as e:
         err(f"failed to get availabe images from repository: {e}" )
 
@@ -112,12 +124,7 @@ def can_redeploy(repository_name):
         ]).stdout)
 
         services = out["serviceArns"]
-        for service in services:
-            # last part of arn is the service name.
-            if repository_name == service.split('/')[-1]:
-                return True
-
-        return False
+        return any(repository_name == service.split('/')[-1] for service in services)
     except subprocess.CalledProcessError as e:
         err(f"failed to list services in cluste {ECS_CLUSTER}")
 

@@ -33,13 +33,10 @@ def pack(query):
     # First collect the list of paths to add to the archive, and sort them.
     paths = []
     for root, dirs, files in os.walk(query["source_dir"]):
-        for name in files:
-            paths.append(os.path.join(root, name))
+        paths.extend(os.path.join(root, name) for name in files)
     paths = list(sorted(paths))
 
-    # Then add all of them to the destination archive.
-    parent = os.path.dirname(query["destination"])
-    if parent:
+    if parent := os.path.dirname(query["destination"]):
         os.makedirs(parent, exist_ok=True)
     zip = zipfile.ZipFile(query["destination"], mode="w")
     for path in paths:
@@ -86,7 +83,7 @@ def terraform_external_program_protocol(inner):
     try:
         result = inner(input)
     except Exception as e:
-        print(e.__class__.__name__ + ": " + str(e), file=sys.stderr)
+        print(f"{e.__class__.__name__}: {str(e)}", file=sys.stderr)
         exit(1)
 
     print(json.dumps(result))

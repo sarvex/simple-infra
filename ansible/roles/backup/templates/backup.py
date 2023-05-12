@@ -32,26 +32,25 @@ class BackupPlan:
 
     def execute(self):
         if self.before is not None:
-            print("[i] Executing before script: %s" % self.name)
+            print(f"[i] Executing before script: {self.name}")
             subprocess.run(self.before, shell=True, check=True)
 
-        print("[i] Executing backup: %s" % self.name)
+        print(f"[i] Executing backup: {self.name}")
         subprocess.run([
             RESTIC_BIN, "backup", "--tag", self.name, self.backup_path,
         ], env=ENV, check=True)
 
         if self.after is not None:
-            print("[i] Executing after script: %s" % self.name)
+            print(f"[i] Executing after script: {self.name}")
             subprocess.run(self.after, shell=True, check=True)
 
 def main():
     """Entry point for the script"""
-    plans = []
-    for file in os.listdir(PLANS):
-        if not file.endswith(".json"):
-            continue
-        plans.append(BackupPlan(os.path.join(PLANS, file)))
-
+    plans = [
+        BackupPlan(os.path.join(PLANS, file))
+        for file in os.listdir(PLANS)
+        if file.endswith(".json")
+    ]
     print("[i] Check repository status")
     res = subprocess.run([RESTIC_BIN, "snapshots"], env=ENV)
     if res.returncode != 0:

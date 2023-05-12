@@ -40,7 +40,7 @@ def run_playbook(args):
         (tempdir / "play" / "roles").symlink_to(BASE_PATH / "roles")
         (tempdir / "play" / "group_vars").symlink_to(BASE_PATH / "group_vars")
         (tempdir / "play" / "playbook.yml").symlink_to(
-            BASE_PATH / "playbooks" / (args.playbook + ".yml")
+            BASE_PATH / "playbooks" / f"{args.playbook}.yml"
         )
         (tempdir / "env").symlink_to(env_dir)
         (tempdir / "ansible.cfg").symlink_to(BASE_PATH / "ansible.cfg")

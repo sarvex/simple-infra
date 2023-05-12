@@ -31,7 +31,7 @@ for config in ["email", "name"]:
         continue
     value = person[config]
     r = ["git", "config", "--global", f"user.{config}", value]
-    print(str(r))
+    print(r)
     subprocess.run(r).check_returncode()
 
 print("successfully configured your user name and email for git")
